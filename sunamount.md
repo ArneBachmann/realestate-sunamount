@@ -5,12 +5,14 @@ This library allows to compare different real estate buying or building alternat
 
 
 ## Requirements ##
-- [Python 3](https://www.python.org)
+- [Python 3](https://www.python.org). Python 2 would be supported, but the `pysolar` package below is not compatible
+- [Coconut programming language](http://coconut.readthedocs.io)
 - [`pysolar` package](http://pysolar.org)
 
-The code is written in the [Coconut programming language](http://coconut.readthedocs.io), but any Python interpreter with a recent `pip` will be able to run the code.
+### Installation
+- The code is written in Coconut, but any Python interpreter with a recent `pip` will be able to compile and run the code
 - Installation is performed via `pip install coconut pysolar`
-- Code is run/tested via `coconut-run --strict sunamount.coco --test --mypy`. No visible output means that all tests have passed.
+- Code is run/tested via `coconut-run --strict sunamount.coco --test --mypy`. Seeing no output means that all tests have passed.
 
 
 ## Provisions ##
@@ -84,8 +86,3 @@ The code is written in the [Coconut programming language](http://coconut.readthe
 - `getHouseScore(location, windows, timeIntervals, obstacles)`
 
   computes an aggregate sun score for all window sides of a house for the provided time intervals (e.g. morning, afternoon). By summing all window sides it becomes possible to compare house options with or without some of the windows, by adding hourly wattages for each window instead of computing an overall average (which might be lower for more windows). Summation for the entire year allows true season-independent comparison of several real estate options.
- 
-
-## Future ideas ##
-- Allow windows to have a height above ground and take into account obstacles' heights in relation to them to have different shadowings between rooms/windows.
-- Create a GUI that allows to place houses, rooms, windows, and surrounding obstacles graphically, including a data base of common shapes
