@@ -43,7 +43,7 @@ This library allows to compare different real estate buying or building alternat
     - `viewingAngle`:float - the orientation that a window is facing to, e.g. 45 means to south-east (northern hemisphere)
     - `incomingAngle`:float - the orientation of incoming light, e.g. -45 means from south-west
     - `stretch_factor`:float - this factor allows to tell the function how stretched the room is and/or how large the window opening is. If the room is twice as long as it is wide, a factor of 2 makes sense. The factor is multiplied internally with the angle difference between viewing angle and incoming light angle to narrow down allowable angles.
-      The room stretch factor can also be multiplied by actual window area (in square length units) to account for different window sizes (e.g. 0.96m^2)
+      The room stretch factor can also be multiplied by actual window area (in square meters) to account for different window sizes (e.g. 0.96m^2)
 
   The function returns a unitless factor that can be multiplied with the amount of sun irradiation hitting the window on the outside to account for angle of arrival (room window orientation) and room dimensions (width / depth ratio)
 - `getAngleCorrectedSunWattage(date, location, viewing, stretch_factor)`
