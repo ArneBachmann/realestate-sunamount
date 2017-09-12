@@ -1,13 +1,17 @@
 # Real estate sunlight estimator #
-Calculate the a score for the amount of natural sunlight coming into a house through its windows, to know if it's nice to live inside it.
+
+Calculates a score for the amount of natural sunlight coming into (the rooms of) a house through its windows, to get an idea of if it's nice to live inside it.
 The library takes shadowing of neighboring buildings and other obstacles into account, as well as computation of realistic sunlight irradiation.
 
-If you use this library for whatever purpose, observe the MPL license and also let me know so I may link back or refer to your projects.
+This software is licensed under the MPL.
 
-- [Link](./sunamount.md) to the package documentation
-- [Link](https://www.sonnenverlauf.de/#/53.468,9.8129,11/2017.08.22/18:47/1/0) to a realistic sunlight simulation over time on a map online
-- [Link](http://pysolar.org) to the `pysolar` library, which is distributed under the GPLv3 license
+If you use this library for whatever purpose, please let me know so I may link back and/or refer to your projects.
+
+- [The package documentation](./sunamount.md)
+- [A realistic sunlight simulation over time on a map online](https://www.sonnenverlauf.de/#/53.468,9.8129,11/2017.08.22/18:47/1/0)
+- [The `pysolar` library](http://pysolar.org), licensed under GPLv3
+- [The `pytz` library](http://pytz.sourceforge.net), licensed under the MIT license
 
 Hint on using timezone-aware `datetime` objects:
-- Using the `.replace(tzinfo)` method works but doesn't handle daylight savings correctly.
-- Better use `pytz` package and use the `.localize()` method
+- Best is using the `pytz` package.
+- Alternatively, use fixed-hours timezones or the replacement class defined for Python 2 (cf. source of `./sunamount.coco`).

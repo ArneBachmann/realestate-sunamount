@@ -8,9 +8,9 @@
 import calendar  # for number of days in a year computation
 import datetime  # for timestamp generation
 import math      # trigonometry
-import time     # for daylight savings information
+import time      # for system locale's daylight savings information
 
-# Dependencies (install via pip pysolar)
+# Dependencies (install via "pip pysolar pytz", the latter only used for unit tests)
 import pysolar.solar
 
 
@@ -35,9 +35,10 @@ except:  # Python 2 workaround
     def utcoffset(_, dt) = _._offset
     def tzname(_, dt) = _._name
     def dst(_, dt) = _._dstoff ?? _._offset   # or None if unknown
-  UTC = Timezone(0)
-  CET = Timezone(1)
-  CEST = Timezone(2)
+  def mktz(hours:float = 0) -> Timezone = Timezone(hours)
+  UTC = mktz(0)
+  CET = mktz(1)
+  CEST = mktz(2)
 
 # Value types: access per attribute or index, as they are named (typed) tuples
 data Location(latitude:float, longitude:float, elevation:float = 0.): pass
@@ -58,7 +59,7 @@ class memoize(dict):
 def daysinyear(year:int) -> int = sum([calendar.monthrange(year, month)[1] for month in range(1, 12 + 1)])
 
 def sq(value:float) -> float = value * value  # or value ** 2
-def is_dst(dt:datetime.datetime) -> Union[bool, int] = time.localtime(calendar.timegm(dt.timetuple())).tm_isdst
+def is_dst(dt:datetime.datetime) -> int = time.localtime(calendar.timegm(dt.timetuple())).tm_isdst  # WARN: uses only the system's local timezone. HINT: In Python, bool is an int, but mypy complains
 def tz_datetime(tz:Timezone) -> function = (*args, **kwargs) -> datetime.datetime(*args, **kwargs).replace(tzinfo = tz)
 
 
@@ -207,14 +208,15 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
   return amount / norm if norm != 0. else 0.
 
 
-def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Timezone = UTC) -> float:
+def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC) -> float:
   ''' Return sum of daily average radiation amount.
       location: 3-tuple(latitude, longitude, elevation) latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
       window:
       timeInterval: daily aggregation interval in hours
       stretch_factor: allows to "narrow" the allowed angle difference. 2 means the room is long or the window size is small in comparison to the house size
       obstacles: list of 5-tuples (distance, direction, width, height, opacity) for obstacles (trees, other houses) in meters and degrees, opacity 0..1 (0 = fully translucent, 1 completely shadowed)
-      timezone, time_dst: (standard, normal, winter) timezone (DST will be considered automatically)
+      timezone: (standard, normal, winter) timezone (DST will be considered automatically from *system* locale, not timezone parameter)
+      time_dst: daylight saving timezone, or None if timezone above is a named timezone from pytz
       returns: computed wattage
 
   >>> location = Location(53.4613331, 9.8276266, 20.)
@@ -226,23 +228,36 @@ def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInt
   153370.104
   >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0.), TimeInterval(11., 15.), timezone = CET, time_dst = CEST), 3))  # is more due to focus on good times
   266687.268
+  >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0.), TimeInterval(1., 5.), timezone = pytz.timezone("Australia/Queensland")), 3))  # no dst in this timezone
+  14860.366
   '''
   amount = 0.
   for days in range(0, daysinyear <| year):
     raw_date = datetime.datetime(year, 1, 1) + datetime.timedelta(days = days)
-    date = tz_datetime(time_dst if is_dst(raw_date) else timezone)(year, raw_date.month, raw_date.day)  # compute day of year
+    if time_dst is None:  # using named timezone from pytz or non-dst fixed timezone
+      date = timezone.localize(raw_date)
+    else:
+      date = tz_datetime(time_dst if is_dst(raw_date) else timezone)(year, raw_date.month, raw_date.day)  # compute day of year WARN: is_dst uses system's locale
     amount += timeInterval.weekFactor * getTimeNormalizedSunWattage(date, location, window, timeInterval, obstacles)
   return amount
 
 
-def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterval[], obstacles:Obstacle[], timezone:Timezone = UTC, time_dst:Timezone = UTC) -> float:
+def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterval[], obstacles:Obstacle[], timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
   ''' Second experiment. Simply show sum of annual amount of daily-hour-normalized sun wattage to compare different house options.
-      timezone, time_dst: timezone object
+      timezone: (standard, normal, winter) timezone (DST will be considered automatically)
+      time_dst: daylight saving timezone, or None if timezone above is a named timezone from pytz
 
+  Define the reference location, windows, times and obstacles:
   >>> location = Location(53.4613331, 9.8276266, 20.)
   >>> windows = [Window(-135., 1., 2.), Window(45., .5, 2.), Window(-45., .5, .3)]
   >>> times = [TimeInterval(7., 9., 7./7.), TimeInterval(16., 22.5, 7/7.), TimeInterval(9., 16., 2./7)]
   >>> obstacles = [Obstacle(50, 20, 10, 10, .9), Obstacle(-5, 30, 5, 4, .9), Obstacle(-45, 10, 10, 10, .9), Obstacle(-135, 15, 10, 10, .8)]
+
+  Use a daylight savings-aware timezone:
+  >>> print(round(getHouseScore(location, windows, times, obstacles, timezone = pytz.timezone("Europe/Berlin")), 4))
+  52799.2992
+
+  Use explicit CET/CEST. TODO this passes only on a CET/CEST machine, because it derives start/end of summertime from current system locale
   >>> print(round(getHouseScore(location, windows, times, obstacles, timezone = CET, time_dst = CEST), 4))
   52799.2992
   '''
@@ -255,4 +270,4 @@ def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterva
 
 if __name__ == '__main__':
   import sys
-  if '--test' in sys.argv: import doctest; doctest.testmod()
+  if '--test' in sys.argv: import doctest, pytz; doctest.testmod()
