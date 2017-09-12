@@ -41,11 +41,11 @@ except:  # Python 2 workaround
   CEST = mktz(2)
 
 # Value types: access per attribute or index, as they are named (typed) tuples
-data Location(latitude:float, longitude:float, elevation:float = 0.): pass
-data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.): pass
-data Window(direction:float, relevance:float = 1., stretch:float = 1.): pass
-data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.): pass
-data Radiation(wattage:float, altitude:float, azimuth:float): pass
+data Location(latitude:float, longitude:float, elevation:float = 0.)
+data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)
+data Window(direction:float, relevance:float = 1., stretch:float = 1.)
+data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.)
+data Radiation(wattage:float, altitude:float, azimuth:float)
 
 
 # Utility decorator
