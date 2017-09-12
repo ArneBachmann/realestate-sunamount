@@ -44,8 +44,8 @@ def compareMidsummerMidwinter(coordinates:Location[]) -> None:
 if __name__ == '__main__':
   compareMidsummerMidwinter <| airportNeugrabenFischbek
 
-  for house, windows in sorted(houseChoices.items()):
+  for house, windows in houseChoices.items() |> sorted:
     house |> print
-    (getHouseScore(airportNeugrabenFischbek, windows, atHomeTimes, houseObstacles.get(house, defaultObstacle))
+    (getHouseScore(airportNeugrabenFischbek, windows, atHomeTimes, houseObstacles.get(house, defaultObstacle), timezone = timezone)
       |> "  # Computed annual sum of hourly radiation during observed times: {}".format
       |> print)
