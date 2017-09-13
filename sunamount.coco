@@ -42,8 +42,9 @@ except:  # Python 2 workaround
 
 # Value types: access per attribute or index, as they are named (typed) tuples
 data Location(latitude:float, longitude:float, elevation:float = 0.)  # degrees, degrees, meters
+data Room(elevation:float = 0., relevance:float = 1.)  # meters, factor
+data Window(direction:float, room:Room = Room(), stretch:float = 1.)  # degrees, Room, factor
 data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)  # degrees, meters, meters, meters, 0..1
-data Window(direction:float, elevation:float = 0., relevance:float = 1., stretch:float = 1.)  # degrees, meters, factor, factor
 data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.)  # 0..23.99, 0..23.99, 0..1
 data Radiation(wattage:float, altitude:float, azimuth:float)  # watts, meters, degrees
 
@@ -148,9 +149,9 @@ def getAngleCorrectedSunWattage(date:datetime.datetime, location:Location, windo
   ''' Get radiation for specific date and looking direction.
       date: datetime timestamp
       location: 3-tuple(latitude, longitude, elevation) latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
-      window: direction facing in degrees, 0 = to south, 90 = to east
+      window: Window value type for viewing direction and room stretch factor in degrees
       stretch_factor: allows to "narrow" the allowed angle difference. 2 means the room is long or the window size is small in comparison to the house size
-      returns: Radiation(angleCorrectedIrradiation, sunAltitude, sunAzimuth)
+      returns: Radiation value type
 
   >>> location = Location(53.4613331, 9.8276266, 20.)
   >>> def output(irr): print((round(irr.wattage, 3), round(irr.altitude, 3), round(irr.azimuth, 3)))
@@ -178,7 +179,7 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
   ''' We compute radiation by the minute, then normalize by time interval.
       date: y/m/d to compute irradiation for
       location: Location value type. latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
-      window: TODO actually a room + window
+      window: window value type
       timeInterval: daily aggregation interval in hours
       obstacles: list of 5-tuples (distance, direction, width, height, opacity) for obstacles (trees, other houses) in meters and degrees, opacity 0..1 (0 = fully translucent, 1 completely shadowed)
       returns: hourly average radiation (for observed time interval)
@@ -203,7 +204,7 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
       radiation = getAngleCorrectedSunWattage(time, location, window)
       shadowFactor = 1.  # start with "no shadowing"
       for obstacle in obstacles:  # using the angle corrected wattage, we only need to consider sun altitude in the following step
-        shadowFactor = min(shadowFactor, getShadowing(radiation.altitude, window.direction, obstacle, window.elevation))  # min for the obstacle blocking the most
+        shadowFactor = min(shadowFactor, getShadowing(radiation.altitude, window.direction, obstacle, window.room.elevation))  # min for the obstacle blocking the most
       assert radiation.altitude >= 0.   and radiation.altitude <= 180.
       assert radiation.azimuth >= -180. and radiation.azimuth  <= 180.
       amount += radiation.wattage * shadowFactor
@@ -215,7 +216,7 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
 def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
   ''' Return sum of daily average radiation amount.
       location: 3-tuple(latitude, longitude, elevation) latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
-      window:
+      window: window value type
       timeInterval: daily aggregation interval in hours
       stretch_factor: allows to "narrow" the allowed angle difference. 2 means the room is long or the window size is small in comparison to the house size
       obstacles: list of 5-tuples (distance, direction, width, height, opacity) for obstacles (trees, other houses) in meters and degrees, opacity 0..1 (0 = fully translucent, 1 completely shadowed)
@@ -254,7 +255,8 @@ def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterva
 
   Define the reference location, windows, times and obstacles:
   >>> location = Location(53.4613331, 9.8276266, 20.)
-  >>> windows = [Window(-135., 0., 1., 2.), Window(45., 0., .5, 2.), Window(-45., 0., .5, .3)]
+  >>> rooms = {"living": Room(0., 1.), "kitchen": Room(0, .5), "office": Room(0., .5)}
+  >>> windows = [Window(-135., rooms["living"], 2.), Window(45., rooms["kitchen"], 2.), Window(-45., rooms["office"], .3)]
   >>> times = [TimeInterval(7., 9., 7./7.), TimeInterval(16., 22.5, 7/7.), TimeInterval(9., 16., 2./7)]
   >>> obstacles = [Obstacle(50, 20, 10, 10, .9), Obstacle(-5, 30, 5, 4, .9), Obstacle(-45, 10, 10, 10, .9), Obstacle(-135, 15, 10, 10, .8)]
 
@@ -269,7 +271,7 @@ def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterva
   amount = 0.
   for window in windows:
     for timeInterval in timeIntervals:
-      amount += window.relevance * getDailySunWattageSumForEntireYear(location, window, timeInterval, obstacles, timezone = timezone, time_dst = time_dst)
+      amount += window.room.relevance * getDailySunWattageSumForEntireYear(location, window, timeInterval, obstacles, timezone = timezone, time_dst = time_dst)
   return amount
 
 

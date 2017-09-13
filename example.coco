@@ -16,9 +16,15 @@ airportNeugrabenFischbek = Location(53.4613331, 9.8276266, 20.)
 atHomeTimes = [TimeInterval(7., 9., 7./7.), TimeInterval(16., 22.5, 7/7.), TimeInterval(9., 16., 2./7)]  # list of time intervals and week factors
 defaultObstacle = Obstacle(10000., 179.99, .001, .001)  # just something very unlikely to be in the path of sunlight
 
+rooms = {  # list of 2-tuples (elevation, relevance)
+  "living":  Room(0., 1.),
+  "kitchen": Room(0., .5),
+  "side":    Room(0., .6)
+}
+
 houseChoices = {
-    "Option 1": [Window(-135., 0., 1., 2.), Window(45., 0., .5, 2.), Window(-45., 0., .5, .3)],  # living room, kitchen, side windows
-    "Option 2": [Window(-80., 0., 1., 2.),  Window(100., 0., .5, 2.)]  # living room, kitchen
+    "Option 1": [Window(-135., rooms["living"], 2.), Window(45.,  rooms["kitchen"], 2.), Window(-45., rooms["side"], .3)],  # living room, kitchen, side windows
+    "Option 2": [Window(-80.,  rooms["living"], 2.), Window(100., rooms["kitchen"], 2.)]  # living room, kitchen
 }
 
 houseObstacles = {

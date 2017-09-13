@@ -3,7 +3,7 @@
 Calculates a score for the amount of natural sunlight coming into (the rooms of) a house through its windows, to get an idea of if it's nice to live inside it.
 The library takes shadowing of neighboring buildings and other obstacles into account, as well as computation of realistic sunlight irradiation.
 
-This software is licensed under the MPL.
+This software is licensed under the [MPL-2.0](https://github.com/ArneBachmann/realestate-sunamount/blob/master/LICENSE).
 
 If you use this library for whatever purpose, please let me know so I may link back and/or refer to your projects.
 
