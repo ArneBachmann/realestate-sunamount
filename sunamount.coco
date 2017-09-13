@@ -212,7 +212,7 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
   return amount / norm if norm != 0. else 0.
 
 
-def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Optional[Timezone] = UTC) -> float:
+def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
   ''' Return sum of daily average radiation amount.
       location: 3-tuple(latitude, longitude, elevation) latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
       window:
@@ -233,7 +233,7 @@ def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInt
   >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0.), TimeInterval(11., 15.), timezone = CET, time_dst = CEST), 3))  # is more due to focus on good times
   266687.268
   >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0.), TimeInterval(1., 5.), timezone = pytz.timezone("Australia/Queensland")), 3))  # no dst in this timezone
-  5993.831
+  14860.366
   '''
   amount = 0.
   for days in range(0, daysinyear <| year):

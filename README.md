@@ -14,4 +14,4 @@ If you use this library for whatever purpose, please let me know so I may link b
 
 Hint on using timezone-aware `datetime` objects:
 - Best is using the `pytz` package.
-- Alternatively, use fixed-hours timezones or the replacement class defined for Python 2 (cf. source of `./sunamount.coco`).
+- Alternatively, use fixed-hours timezones or the replacement class defined for Python 2 (cf. source of [`sunamount`](./sunamount.coco)).
