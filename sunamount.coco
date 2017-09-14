@@ -42,7 +42,7 @@ except:  # Python 2 workaround
 
 # Value types: access per attribute or index, as they are named (typed) tuples
 data Location(latitude:float, longitude:float, elevation:float = 0.)  # degrees, degrees, meters
-data Room(elevation:float = 0., relevance:float = 1.)  # meters, factor
+data Room(elevation:float = 0., relevance:float = 1., times:Optional[TimeInterval[]] = None)  # meters, factor, time intervals (if None, use default)
 data Window(direction:float, room:Room = Room(), stretch:float = 1.)  # degrees, Room, factor
 data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)  # degrees, meters, meters, meters, 0..1
 data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.)  # 0..23.99, 0..23.99, 0..1
@@ -247,7 +247,7 @@ def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInt
   return amount
 
 
-def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterval[], obstacles:Obstacle[], timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
+def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], timeIntervals:TimeInterval[] = [], timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
   ''' Second experiment. Simply show sum of annual amount of daily-hour-normalized sun wattage to compare different house options.
       timezone: (standard, normal, winter) timezone (DST will be considered automatically)
       time_dst: daylight saving timezone, or None if timezone above is a named timezone from pytz
@@ -261,16 +261,16 @@ def getHouseScore(location:Location, windows:Window[], timeIntervals:TimeInterva
   >>> obstacles = [Obstacle(50, 20, 10, 10, .9), Obstacle(-5, 30, 5, 4, .9), Obstacle(-45, 10, 10, 10, .9), Obstacle(-135, 15, 10, 10, .8)]
 
   Use a daylight savings-aware timezone:
-  >>> print(round(getHouseScore(location, windows, times, obstacles, timezone = pytz.timezone("Europe/Berlin")), 4))
+  >>> print(round(getHouseScore(location, windows, obstacles, times, timezone = pytz.timezone("Europe/Berlin")), 4))
   52799.2992
 
   Use explicit CET/CEST. TODO this passes only on a CET/CEST machine, because it derives start/end of summertime from current system locale
-  >>> print(round(getHouseScore(location, windows, times, obstacles, timezone = CET, time_dst = CEST), 4))
+  >>> print(round(getHouseScore(location, windows, obstacles, times, timezone = CET, time_dst = CEST), 4))
   52799.2992
   '''
   amount = 0.
   for window in windows:
-    for timeInterval in timeIntervals:
+    for timeInterval in window.room.times ?? timeIntervals:  # use default if nothing defined on room
       amount += window.room.relevance * getDailySunWattageSumForEntireYear(location, window, timeInterval, obstacles, timezone = timezone, time_dst = time_dst)
   return amount
 
