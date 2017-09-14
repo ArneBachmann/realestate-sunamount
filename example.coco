@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
+# Example application that may be adapted to the user'S liking
 
-# Example application that can be adapted to your needs.
 
-from sunamount import *
-
+# Dependencies (install via "pip install pytz")
 try:
   import pytz  # https://stackoverflow.com/questions/7373389/get-the-dst-boundaries-of-a-given-timezone-in-python
   timezone = pytz.timezone("Europe/Berlin")
@@ -11,7 +10,11 @@ except:
   LOCAL_TIME_OFFSET = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo.utcoffset(None).total_seconds() / 3600.  # or import time; time.localtime().tm_gmtoff / 3600.  # e.g. tm_zone = "CEST" -> 2.  or float(time.strftime("%z")[:3]) + int(time.strftime("%z")[3:5]) / 60.
   timezone = Timezone(LOCAL_TIME_OFFSET)
 
+# Custom module
+from sunamount import *
 
+
+# Constants
 airportNeugrabenFischbek = Location(53.4613331, 9.8276266, 20.)
 atHomeTimes = [TimeInterval(7., 9., 7./7.), TimeInterval(16., 22.5, 7/7.), TimeInterval(9., 16., 2./7)]  # list of time intervals and week factors
 defaultObstacle = Obstacle(10000., 179.99, .001, .001)  # just something very unlikely to be in the path of sunlight
@@ -33,6 +36,7 @@ houseObstacles = {
 }
 
 
+# Functions
 def compareMidsummerMidwinter(coordinates:Location[]) -> None:
   ''' One experiment to confirm assumptions about sun light during day/year. '''
   "Radiation amount on midsummer/midwinter day for specified time windows:" |> print
@@ -48,7 +52,7 @@ def compareMidsummerMidwinter(coordinates:Location[]) -> None:
 
 
 if __name__ == '__main__':
-  compareMidsummerMidwinter <| airportNeugrabenFischbek
+  compareMidsummerMidwinter <| airportNeugrabenFischbek  # Do a sanity check
 
   for house, windows in houseChoices.items() |> sorted:
     house |> print

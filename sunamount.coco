@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# This module provides functions to evaluate a rooms or houses sun irradiation for comparison of real estate options.
+# This module provides functions to evaluate a room's or house's sun irradiation for comparison of real estate options.
 # This code requires the coconut transpiler (pip install coconut) and can be tested via coconut-run --strict sunamount.coco --test --mypy
 
 
@@ -10,43 +10,23 @@ import datetime  # for timestamp generation
 import math      # trigonometry
 import time      # for system locale's daylight savings information
 
-# Dependencies (install via "pip pysolar pytz", the latter only used for unit tests)
+# Dependencies (install via "pip install pysolar pytz", the latter only used for unit tests)
 import pysolar.solar
 
 
-# Constants
-REF_YEAR:int = 2015  # the pysolar module currently doesn't contain information on leap seconds after 2015, therefore we use that for whole-year calculations to avoid a warning
-MINUTE_STEPS:int = 5  # time interval (int) for accumulated daily sun wattage
-
-
-try:  # Python 3
-  UTC:datetime.timezone = datetime.timezone.utc  # the default for all test cases
-  Timezone = datetime.timezone  # typedef
-  def mktz(hours:float = 0) -> Timezone = Timezone(datetime.timedelta(hours = hours))
-  CET = mktz(1)
-  CEST = mktz(2)
-except:  # Python 2 workaround
-  class TimeZone(datetime.tzinfo):
-    def __init__(_, hours:float = 0, dst_hours:Optional[float] = None, name:Anystr = "<unknown timezone>"):
-      datetime.tzinfo.__init__(_)  # call super constructor
-      _._offset = datetime.timedelta(hours = hours)
-      _._dstoff = datetime.timedelta(hours = dst_hours)
-      _._name = name
-    def utcoffset(_, dt:datetime.datetime) = _._offset
-    def tzname(_, dt:datetime.datetime) = _._name
-    def dst(_, dt:datetime.datetime) = _._dstoff ?? _._offset   # or None if unknown
-  def mktz(hours:float = 0) -> Timezone = Timezone(hours)
-  UTC = mktz(0)
-  CET = mktz(1)
-  CEST = mktz(2)
-
-# Value types: access per attribute or index, as they are named (typed) tuples
+# Value type definitionss: instantiation and access per keyword or index
 data Location(latitude:float, longitude:float, elevation:float = 0.)  # degrees, degrees, meters
 data Room(elevation:float = 0., relevance:float = 1., times:Optional[TimeInterval[]] = None)  # meters, factor, time intervals (if None, use default)
 data Window(direction:float, room:Room = Room(), stretch:float = 1.)  # degrees, Room, factor
 data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)  # degrees, meters, meters, meters, 0..1
 data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.)  # 0..23.99, 0..23.99, 0..1
 data Radiation(wattage:float, altitude:float, azimuth:float)  # watts, meters, degrees
+
+
+# Constants
+REF_YEAR:int = 2015  # last year with leap seconds definition of the pysolar module, to avoid a warning
+MINUTE_STEPS:int = 5  # time interval for accumulated daily sun wattage (increase for faster, decrease for more accurate results)
+ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99)
 
 
 # Utility decorator
@@ -56,21 +36,48 @@ class memoize(dict):
   def __missing__(_, key): result = _[key] = _.func(*key); return result
 
 
+try:  # Python 3
+  UTC:datetime.timezone = datetime.timezone.utc  # the default for all test cases
+  Timezone = datetime.timezone  # typedef
+  @memoize
+  def mktz(hours:float = 0) -> Timezone = Timezone(datetime.timedelta(hours = hours))
+  CET =  mktz(1)
+  CEST = mktz(2)
+except:  # Python 2 workaround
+  class TimeZone(datetime.tzinfo):
+    def __init__(_, hours:float = 0, dst_hours:Optional[float] = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:Anystr = "<unknown timezone>"):
+      datetime.tzinfo.__init__(_)  # call super constructor
+      _._offset = datetime.timedelta(hours = hours)
+      _._dstoff = datetime.timedelta(hours = dst_hours)
+      _._start = dst_start
+      _._end = dst_end
+      _._name = name
+    def utcoffset(_, dt:datetime.datetime) = _._offset
+    def tzname(_, dt:datetime.datetime) = _._name
+    def dst(_, dt:datetime.datetime) = _._dstoff ?? _._offset   # or None if unknown
+    def localize(_, dt:datetime.datetime) =
+      date_tuple = (dt.month, dt.day, dt.hour, dt.minute)
+      dt.replace(tzinfo = mktz(_._dstoff if _._start <= date_tuple <= _._end else _._offset))
+  @memoize
+  def mktz(hours:float = 0) -> Timezone = Timezone(hours)
+  UTC = mktz(0)
+  CET = mktz(1)
+  CEST = mktz(2)
+
+
 @memoize
 def daysinyear(year:int) -> int = sum([calendar.monthrange(year, month)[1] for month in range(1, 12 + 1)])
 
 def sq(value:float) -> float = value * value  # or value ** 2
+
 def is_dst(dt:datetime.datetime) -> int = time.localtime(calendar.timegm(dt.timetuple())).tm_isdst  # WARN: uses only the system's local timezone. HINT: In Python, bool is an int, but mypy complains
+
 def tz_datetime(tz:Timezone) -> function = (*args, **kwargs) -> datetime.datetime(*args, **kwargs).replace(tzinfo = tz)
 
 
 def getShadowing(sunAltitude:float, direction:float, obstacle:Obstacle, elevation:float = 0.) -> float:
   ''' Returns sunlight ratio of another building shadowing a window
-      sunAltitude: the sun's altitude above the horizon in degrees
-      direction: direction the window (or observer) is facing to in degrees, 0 = to south, 90 = to east (for northern hemisphere)
-      obstacle: obstacle to take into account (distance, direction, width, height, opacity)
-      elevation: window bottom side height above ground, allows comparison of windows at different floors
-      returns: 0..1 factor for incoming sunlight, to reduce wattage by obstacle blocking some light (lower is less light/more shadowing)
+      returns: 0..1 factor to multiply with incoming sunlight wattage, to reduce its value by the obstacle blocking some light (lower value means less light/more shadowing)
 
   >>> print(round(getShadowing(2, 90, Obstacle(91, 10, 2, 5)), 4))  # hypo: 11.18m, vangle: 24.10°, hypo: 10.05m, hangle: 11.26°
   0.0074
@@ -105,10 +112,7 @@ def getShadowing(sunAltitude:float, direction:float, obstacle:Obstacle, elevatio
 
 def getAngleCorrectionRoomFactor(viewingAngle:float, incomingAngle:float, stretch_factor:float = 1.) -> float:
   ''' Return light factor determined by angle difference.
-      viewingAngle: direction a window is facing in degrees
-      incomingAngle: incoming light direction in degrees
-      stretch_factor: allows to "narrow" the allowed angle difference
-      returns: factor that corrects the sunlight wattage
+      returns: 0..1 factor that corrects the sunlight wattage
 
   >>> def output(*args): print(round(getAngleCorrectionRoomFactor(*args), 3))
   >>> output(0., 0.)
@@ -146,12 +150,8 @@ def getAngleCorrectionRoomFactor(viewingAngle:float, incomingAngle:float, stretc
 
 
 def getAngleCorrectedSunWattage(date:datetime.datetime, location:Location, window:Window) -> Radiation:
-  ''' Get radiation for specific date and looking direction.
-      date: datetime timestamp
-      location: 3-tuple(latitude, longitude, elevation) latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
-      window: Window value type for viewing direction and room stretch factor in degrees
-      stretch_factor: allows to "narrow" the allowed angle difference. 2 means the room is long or the window size is small in comparison to the house size
-      returns: Radiation value type
+  ''' Get radiation amount for specific date, location, and viewing direction.
+      returns: a Radiation value type
 
   >>> location = Location(53.4613331, 9.8276266, 20.)
   >>> def output(irr): print((round(irr.wattage, 3), round(irr.altitude, 3), round(irr.azimuth, 3)))
@@ -166,8 +166,8 @@ def getAngleCorrectedSunWattage(date:datetime.datetime, location:Location, windo
   >>> output(getAngleCorrectedSunWattage(tz_datetime(CEST)(REF_YEAR, 6, 1, 9), location, Window(-90.)))  # noon june other angle
   (0.0, 0.0, 0.0)
   '''
-  altitude:float = pysolar.solar.get_altitude(location.latitude, location.longitude, date, location.elevation)  # in degrees and meters
-  azimuth:float = pysolar.solar.get_azimuth(location.latitude, location.longitude, date, location.elevation)
+  altitude:float = pysolar.solar.get_altitude(location.latitude, location.longitude, date, location.elevation + window.room.elevation)  # in degrees and meters
+  azimuth:float = pysolar.solar.get_azimuth(location.latitude, location.longitude, date, location.elevation + window.room.elevation)
   if azimuth < -180.:  azimuth += 360.  # normalization
   elif azimuth > 180.: azimuth -= 360.  # to -180..180
   if altitude < 0. or  altitude > 180.: return Radiation(0., 0., 0.)  # behind the horizon, don't return radiation
@@ -175,13 +175,8 @@ def getAngleCorrectedSunWattage(date:datetime.datetime, location:Location, windo
   return Radiation(factor * pysolar.solar.radiation.get_radiation_direct(date, altitude), altitude, azimuth) if factor > 0. else Radiation(0., 0., 0.)  # compute radiation in Watts / square meter
 
 
-def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, window:Window, timeInterval:TimeInterval = TimeInterval(fromHour = 0., toHour = 23.99), obstacles:Obstacle[] = [], minute_interval:int = MINUTE_STEPS) -> float:
-  ''' We compute radiation by the minute, then normalize by time interval.
-      date: y/m/d to compute irradiation for
-      location: Location value type. latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
-      window: window value type
-      timeInterval: daily aggregation interval in hours
-      obstacles: list of 5-tuples (distance, direction, width, height, opacity) for obstacles (trees, other houses) in meters and degrees, opacity 0..1 (0 = fully translucent, 1 completely shadowed)
+def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, window:Window, timeInterval:TimeInterval = ENTIRE_DAY, obstacles:Obstacle[] = [], minute_interval:int = MINUTE_STEPS) -> float =
+  ''' Computes radiation by the minute, then normalize by time interval for an hourly value.
       returns: hourly average radiation (for observed time interval)
 
   >>> location = Location(53.4613331, 9.8276266, 20.)
@@ -210,19 +205,12 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
       amount += radiation.wattage * shadowFactor
   norm:float = (60. / MINUTE_STEPS) * (timeInterval.toHour - timeInterval.fromHour)
   assert norm >= 0.
-  return amount / norm if norm != 0. else 0.
+  amount / norm if norm != 0. else 0.
 
 
-def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
+def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float =
   ''' Return sum of daily average radiation amount.
-      location: 3-tuple(latitude, longitude, elevation) latitude: in northern hemisphere positive, longitude: positive looking east from Greenwich, elevation: meters above ocean level
-      window: window value type
-      timeInterval: daily aggregation interval in hours
-      stretch_factor: allows to "narrow" the allowed angle difference. 2 means the room is long or the window size is small in comparison to the house size
-      obstacles: list of 5-tuples (distance, direction, width, height, opacity) for obstacles (trees, other houses) in meters and degrees, opacity 0..1 (0 = fully translucent, 1 completely shadowed)
-      timezone: (standard, normal, winter) timezone (DST will be considered automatically from *system* locale, not timezone parameter)
-      time_dst: daylight saving timezone, or None if timezone above is a named timezone from pytz
-      returns: computed wattage
+      returns: computed aggregate wattage
 
   >>> location = Location(53.4613331, 9.8276266, 20.)
   >>> print(round(getTimeNormalizedSunWattage(tz_datetime(CET)(REF_YEAR, 3, 1), location, Window(0.), TimeInterval(fromHour = 9., toHour = 18.)), 3))
@@ -244,14 +232,12 @@ def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInt
     else:
       date = tz_datetime(time_dst if is_dst(raw_date) else timezone)(year, raw_date.month, raw_date.day)  # compute day of year WARN: is_dst uses system's locale
     amount += timeInterval.weekFactor * getTimeNormalizedSunWattage(date, location, window, timeInterval, obstacles)
-  return amount
+  amount
 
 
-def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], timeIntervals:TimeInterval[] = [], timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float:
+def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], timeIntervals:TimeInterval[] = [], timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float =
   ''' Second experiment. Simply show sum of annual amount of daily-hour-normalized sun wattage to compare different house options.
-      timezone: (standard, normal, winter) timezone (DST will be considered automatically)
-      time_dst: daylight saving timezone, or None if timezone above is a named timezone from pytz
-      returns: a score >= 0.
+      returns: a score >= 0
 
   Define the reference location, windows, times and obstacles:
   >>> location = Location(53.4613331, 9.8276266, 20.)
@@ -260,19 +246,20 @@ def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], tim
   >>> times = [TimeInterval(7., 9., 7./7.), TimeInterval(16., 22.5, 7/7.), TimeInterval(9., 16., 2./7)]
   >>> obstacles = [Obstacle(50, 20, 10, 10, .9), Obstacle(-5, 30, 5, 4, .9), Obstacle(-45, 10, 10, 10, .9), Obstacle(-135, 15, 10, 10, .8)]
 
-  Use a daylight savings-aware timezone:
+  Use a daylight saving-aware timezone:
   >>> print(round(getHouseScore(location, windows, obstacles, times, timezone = pytz.timezone("Europe/Berlin")), 4))
   52799.2992
 
-  Use explicit CET/CEST. TODO this passes only on a CET/CEST machine, because it derives start/end of summertime from current system locale
+  Use explicit CET/CEST timezones. TODO This test passes only on a CET/CEST machine, because it derives DST'S start/end dates from the current system locale
   >>> print(round(getHouseScore(location, windows, obstacles, times, timezone = CET, time_dst = CEST), 4))
   52799.2992
   '''
   amount = 0.
   for window in windows:
+    assert window.room is None or len(window.room) > 0
     for timeInterval in window.room.times ?? timeIntervals:  # use default if nothing defined on room
       amount += window.room.relevance * getDailySunWattageSumForEntireYear(location, window, timeInterval, obstacles, timezone = timezone, time_dst = time_dst)
-  return amount
+  amount
 
 
 if __name__ == '__main__':
