@@ -221,8 +221,18 @@ def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInt
   153370.104
   >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0.), TimeInterval(11., 15.), timezone = CET, time_dst = CEST), 3))  # is more due to focus on good times
   266687.268
+
+  Try another timezone (but for same location - doesn't really make much sense, but exemplifies the "localize" logic)
   >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0.), TimeInterval(1., 5.), timezone = pytz.timezone("Australia/Queensland")), 3))  # no dst in this timezone
   14860.366
+
+  Now try something with an obstacle:
+  >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0., room = Room(elevation = 0.)), TimeInterval(11., 15.), [Obstacle(5, 30, 6, 7, .9)], timezone = pytz.timezone("Europe/Berlin")), 3))  # no dst in this timezone
+  257854.546
+
+  And again, with a floor height of 5 meters, which should result in more sunlight
+  >>> print(round(getDailySunWattageSumForEntireYear(location, Window(0., room = Room(elevation = 5.)), TimeInterval(11., 15.), [Obstacle(5, 30, 6, 7, .9)], timezone = pytz.timezone("Europe/Berlin")), 3))  # no dst in this timezone
+  266687.268
   '''
   amount = 0.
   for days in range(0, daysinyear <| year):
@@ -253,6 +263,21 @@ def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], tim
   Use explicit CET/CEST timezones. TODO This test passes only on a CET/CEST machine, because it derives DST'S start/end dates from the current system locale
   >>> print(round(getHouseScore(location, windows, obstacles, times, timezone = CET, time_dst = CEST), 4))
   52799.2992
+
+  Start a new example:
+  >>> print(round(getHouseScore(location, windows[1:2], obstacles[1:2], times, timezone = CET, time_dst = CEST), 4))
+  29222.2158
+
+  Update window's room's floor height:
+  >>> windows[1] = windows[1]._replace(room = windows[1].room._replace(elevation = 4.))  # raise window's room floor to achieve more light inside
+  >>> print(round(getHouseScore(location, windows[1:2], obstacles[1:2], times[:1], timezone = CET, time_dst = CEST), 4))
+  14056.5206
+
+  Now check room time interval vs. default time intervals:
+  >>> time = [TimeInterval(10, 15)]  # around noon instead
+  >>> windows[1] = windows[1]._replace(room = windows[1].room._replace(times = time))  # update time interval
+  >>> print(round(getHouseScore(location, windows[1:2], obstacles[1:2], times[:1], timezone = CET, time_dst = CEST), 4))
+  58162.953
   '''
   amount = 0.
   for window in windows:
