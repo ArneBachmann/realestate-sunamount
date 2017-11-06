@@ -7,16 +7,21 @@
 # Standard modules
 import calendar  # for number of days in a year computation
 import datetime  # for timestamp generation
+import datetime.timezone  # for timestamp generation
 import math      # trigonometry
 import time      # for system locale's daylight savings information
 
 # Dependencies (install via "pip install pysolar pytz", the latter only used for unit tests)
 import pysolar.solar
 
+try:
+  from typing import Any, List, Type
+except: pass
+
 
 # Value type definitionss: instantiation and access per keyword or index
 data Location(latitude:float, longitude:float, elevation:float = 0.)  # degrees, degrees, meters
-data Room(elevation:float = 0., relevance:float = 1., times:Optional[TimeInterval[]] = None)  # meters, factor, time intervals (if None, use default)
+data Room(elevation:float = 0., relevance:float = 1., times:TimeInterval[]? = None)  # meters, factor, time intervals (if None, use default)
 data Window(direction:float, room:Room = Room(), stretch:float = 1.)  # degrees, Room, factor
 data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)  # degrees, meters, meters, meters, 0..1
 data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.)  # 0..23.99, 0..23.99, 0..1
@@ -31,21 +36,21 @@ ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99)
 
 # Utility decorator
 class memoize(dict):
-  def __init__(_, func): _.func = func
+  def __init__(_, func: -> Any?) -> None: _.func = func
   def __call__(_, *args) = _[args]
   def __missing__(_, key): result = _[key] = _.func(*key); return result
 
 
 try:  # Python 3
-  UTC:datetime.timezone = datetime.timezone.utc  # the default for all test cases
-  Timezone = datetime.timezone  # typedef
+  Timezone:Type = datetime.timezone  # typedef
+  UTC:Timezone = datetime.timezone.utc  # the default for all test cases
   @memoize
   def mktz(hours:float = 0) -> Timezone = Timezone(datetime.timedelta(hours = hours))
   CET =  mktz(1)
   CEST = mktz(2)
 except:  # Python 2 workaround
   class TimeZone(datetime.tzinfo):
-    def __init__(_, hours:float = 0, dst_hours:Optional[float] = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:Anystr = "<unknown timezone>"):
+    def __init__(_, hours:float = 0, dst_hours:float? = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
       datetime.tzinfo.__init__(_)  # call super constructor
       _._offset = datetime.timedelta(hours = hours)
       _._dstoff = datetime.timedelta(hours = dst_hours)
@@ -208,7 +213,7 @@ def getTimeNormalizedSunWattage(date:datetime.datetime, location:Location, windo
   amount / norm if norm != 0. else 0.
 
 
-def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float =
+def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInterval:TimeInterval, obstacles:Obstacle[] = [], year:int = REF_YEAR, timezone:Timezone = UTC, time_dst:Timezone? = None) -> float =
   ''' Return sum of daily average radiation amount.
       returns: computed aggregate wattage
 
@@ -245,7 +250,7 @@ def getDailySunWattageSumForEntireYear(location:Location, window:Window, timeInt
   amount
 
 
-def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], timeIntervals:TimeInterval[] = [], timezone:Timezone = UTC, time_dst:Optional[Timezone] = None) -> float =
+def getHouseScore(location:Location, windows:Window[], obstacles:Obstacle[], timeIntervals:TimeInterval[] = [], timezone:Timezone = UTC, time_dst:Timezone? = None) -> float =
   ''' Second experiment. Simply show sum of annual amount of daily-hour-normalized sun wattage to compare different house options.
       returns: a score >= 0
 
