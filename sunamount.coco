@@ -7,7 +7,6 @@
 # Standard modules
 import calendar  # for number of days in a year computation
 import datetime  # for timestamp generation
-import datetime.timezone  # for timestamp generation
 import math      # trigonometry
 import time      # for system locale's daylight savings information
 
