@@ -106,3 +106,7 @@ This library allows to compare different real estate buying or building alternat
   By summing up all window sides it becomes possible to compare house options with or without some of the windows.
   By adding hourly wattages for each window instead of computing an overall average (which might be lower for more windows), comparison between number of windows becomes possible.
   Summation for the entire year allows true season-independent comparison of several real estate options.
+
+## Todo ##
+- Provide a pre-transpiled Python-installable package, also for conda
+- Create a GUI

@@ -45,8 +45,8 @@ try:  # Python 3
   UTC:Timezone = datetime.timezone.utc  # the default for all test cases
   @memoize
   def mktz(hours:float = 0) -> Timezone = Timezone(datetime.timedelta(hours = hours))
-  CET =  mktz(1)
-  CEST = mktz(2)
+  CET:Timezone =  mktz(1)
+  CEST:Timezone = mktz(2)
 except:  # Python 2 workaround
   class TimeZone(datetime.tzinfo):
     def __init__(_, hours:float = 0, dst_hours:float? = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
@@ -56,9 +56,9 @@ except:  # Python 2 workaround
       _._start = dst_start
       _._end = dst_end
       _._name = name
-    def utcoffset(_, dt:datetime.datetime) = _._offset
-    def tzname(_, dt:datetime.datetime) = _._name
-    def dst(_, dt:datetime.datetime) = _._dstoff ?? _._offset   # or None if unknown
+    def utcoffset(_, dt:datetime.datetime) -> datetime.timedelta = _._offset
+    def tzname(_, dt:datetime.datetime) -> str = _._name
+    def dst(_, dt:datetime.datetime) -> datetime.timedelta? = _._dstoff ?? _._offset   # or None if unknown
     def localize(_, dt:datetime.datetime) =
       date_tuple = (dt.month, dt.day, dt.hour, dt.minute)
       dt.replace(tzinfo = mktz(_._dstoff if _._start <= date_tuple <= _._end else _._offset))
