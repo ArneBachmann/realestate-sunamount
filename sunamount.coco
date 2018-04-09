@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+# Copyright Arne Bachmann
 
 # This module provides functions to evaluate a room's or house's sun irradiation for comparison of real estate options.
-# This code requires the coconut transpiler (pip install coconut) and can be tested via coconut-run --strict sunamount.coco --test --mypy
+# This code requires the Coconut transpiler (pip install coconut) and can be tested via coconut-run --strict sunamount.coco --test --mypy
 
 
 # Standard modules
@@ -10,7 +11,7 @@ import datetime  # for timestamp generation
 import math      # trigonometry
 import time      # for system locale's daylight savings information
 
-# Dependencies (install via "pip install pysolar pytz", the latter only used for unit tests)
+# Dependencies (install via "pip install pysolar pytz" - the latter only used for unit tests)
 import pysolar.solar
 
 try:
@@ -29,7 +30,7 @@ data Radiation(wattage:float, altitude:float, azimuth:float)  # watts, meters, d
 
 # Constants
 REF_YEAR:int = 2015  # last year with leap seconds definition of the pysolar module, to avoid a warning
-MINUTE_STEPS:int = 5  # time interval for accumulated daily sun wattage (increase for faster, decrease for more accurate results)
+MINUTE_STEPS:int = 5  # time interval for accumulated daily sun wattage (increase for faster computation, decrease for more accurate results)
 ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99)
 
 
@@ -44,12 +45,12 @@ try:  # Python 3
   Timezone:Type = datetime.timezone  # typedef
   UTC:Timezone = datetime.timezone.utc  # the default for all test cases
   @memoize
-  def mktz(hours:float = 0) -> Timezone = Timezone(datetime.timedelta(hours = hours))
+  def mktz(hours:float = 0.) -> Timezone = Timezone(datetime.timedelta(hours = hours))
   CET:Timezone =  mktz(1)
   CEST:Timezone = mktz(2)
 except:  # Python 2 workaround
   class TimeZone(datetime.tzinfo):
-    def __init__(_, hours:float = 0, dst_hours:float? = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
+    def __init__(_, hours:float = 0., dst_hours:float? = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
       datetime.tzinfo.__init__(_)  # call super constructor
       _._offset = datetime.timedelta(hours = hours)
       _._dstoff = datetime.timedelta(hours = dst_hours)
@@ -64,8 +65,8 @@ except:  # Python 2 workaround
       dt.replace(tzinfo = mktz(_._dstoff if _._start <= date_tuple <= _._end else _._offset))
   @memoize
   def mktz(hours:float = 0) -> Timezone = Timezone(hours)
-  UTC = mktz(0)
-  CET = mktz(1)
+  UTC =  mktz(0)
+  CET =  mktz(1)
   CEST = mktz(2)
 
 
@@ -174,7 +175,7 @@ def getAngleCorrectedSunWattage(date:datetime.datetime, location:Location, windo
   azimuth:float = pysolar.solar.get_azimuth(location.latitude, location.longitude, date, location.elevation + window.room.elevation)
   if azimuth < -180.:  azimuth += 360.  # normalization
   elif azimuth > 180.: azimuth -= 360.  # to -180..180
-  if altitude < 0. or  altitude > 180.: return Radiation(0., 0., 0.)  # behind the horizon, don't return radiation
+  if altitude < 0. or altitude >  180.: return Radiation(0., 0., 0.)  # behind the horizon, don't return radiation
   factor = getAngleCorrectionRoomFactor(window.direction, azimuth, window.stretch)
   return Radiation(factor * pysolar.solar.radiation.get_radiation_direct(date, altitude), altitude, azimuth) if factor > 0. else Radiation(0., 0., 0.)  # compute radiation in Watts / square meter
 

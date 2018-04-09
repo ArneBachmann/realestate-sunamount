@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# Example application that may be adapted to the user'S liking
+# Copyright Arne Bachmann
+
+# Example application that may be adapted to the user's liking (anonymous real-world houses)
 
 
 # Dependencies (install via "pip install pytz")
