@@ -23,7 +23,7 @@ except: pass
 data Location(latitude:float, longitude:float, elevation:float = 0.)  # degrees, degrees, meters
 data Room(elevation:float = 0., relevance:float = 1., times:TimeInterval[]? = None)  # meters, factor, time intervals (if None, use default)
 data Window(direction:float, room:Room = Room(), stretch:float = 1.)  # degrees, Room, factor
-data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)  # degrees, meters, meters, meters, 0..1
+data Obstacle(direction:float, distance:float, width:float, height:float, opacity:float = 1.)  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
 data TimeInterval(fromHour:float, toHour:float, weekFactor:float = 7./7.)  # 0..23.99, 0..23.99, 0..1
 data Radiation(wattage:float, altitude:float, azimuth:float)  # watts, meters, degrees
 
@@ -31,7 +31,7 @@ data Radiation(wattage:float, altitude:float, azimuth:float)  # watts, meters, d
 # Constants
 REF_YEAR:int = 2015  # last year with leap seconds definition of the pysolar module, to avoid a warning
 MINUTE_STEPS:int = 5  # time interval for accumulated daily sun wattage (increase for faster computation, decrease for more accurate results)
-ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99)
+ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99, weekFactor = 1.)
 
 
 # Utility decorator
@@ -50,7 +50,7 @@ try:  # Python 3
   CEST:Timezone = mktz(2)
 except:  # Python 2 workaround
   class TimeZone(datetime.tzinfo):
-    def __init__(_, hours:float = 0., dst_hours:float? = None, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
+    def __init__(_, hours:float = 0., dst_hours:float = 0, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
       datetime.tzinfo.__init__(_)  # call super constructor
       _._offset = datetime.timedelta(hours = hours)
       _._dstoff = datetime.timedelta(hours = dst_hours)
