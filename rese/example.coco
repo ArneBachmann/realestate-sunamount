@@ -1,0 +1,63 @@
+# -*- coding: utf-8 -*-
+# Copyright Arne Bachmann
+
+# Example application that may be adapted to the user's liking (anonymous real-world houses)
+
+
+# Dependencies (install via "pip install pytz")
+try:
+  import pytz  # https://stackoverflow.com/questions/7373389/get-the-dst-boundaries-of-a-given-timezone-in-python
+  timezone = pytz.timezone("Europe/Berlin")
+except:
+  LOCAL_TIME_OFFSET = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo.utcoffset(None).total_seconds() / 3600.  # or import time; time.localtime().tm_gmtoff / 3600.  # e.g. tm_zone = "CEST" -> 2.  or float(time.strftime("%z")[:3]) + int(time.strftime("%z")[3:5]) / 60.
+  timezone = Timezone(LOCAL_TIME_OFFSET)
+
+# Custom module
+from sunamount import *
+
+
+# Constants
+airportNeugrabenFischbek = Location(53.4613331, 9.8276266, 20.)
+atHomeTimes = [TimeInterval(7., 9., 7./7.), TimeInterval(16., 22.5, 7/7.), TimeInterval(9., 16., 2./7)]  # list of time intervals and week factors
+defaultObstacle = Obstacle(10000., 179.99, .001, .001)  # just something very unlikely to be in the path of sunlight
+
+rooms = {  # list of 2-tuples (elevation, relevance)
+  "living":  Room(0., 1.),
+  "kitchen": Room(0., .5),
+  "side":    Room(0., .6)
+}
+
+houseChoices = {
+    "Option 1": [Window(-135., rooms["living"], 2.), Window(45.,  rooms["kitchen"], 2.), Window(-45., rooms["side"], .3)],  # living room, kitchen, side windows
+    "Option 2": [Window(-80.,  rooms["living"], 2.), Window(100., rooms["kitchen"], 2.)]  # living room, kitchen
+}
+
+houseObstacles = {
+    "Option 1": [Obstacle(20, 50, 10, 10, .9),  Obstacle(30, -5, 5, 4, .9), Obstacle(10, -45, 10, 10, .9), Obstacle(15, -135, 10, 10, .8)],  # house, garage, house, house
+    "Option 2": [Obstacle(10, 100, 50, 15, .4), Obstacle(20, -95, 8, 8, .9)]  # trees behind river and house on the other side of the garden
+}
+
+
+# Functions
+def compareMidsummerMidwinter(coordinates:Location[]) -> None:
+  ''' One experiment to confirm assumptions about sun light during day/year. '''
+  "Radiation amount on midsummer/midwinter day for specified time windows:" |> print
+  for viewing in range(-90, 91, 45):  # from west over south to east
+    atMidsummer = sum([hours.weekFactor * getTimeNormalizedSunWattage(tz_datetime(timezone)(REF_YEAR,  6, 22), coordinates, Window(viewing), hours) for hours in atHomeTimes])
+    atMidwinter = sum([hours.weekFactor * getTimeNormalizedSunWattage(tz_datetime(timezone)(REF_YEAR, 12, 23), coordinates, Window(viewing), hours) for hours in atHomeTimes])
+    "  # Windows facing at an angle of %d deg: %8f / %8f" % (viewing, atMidsummer, atMidwinter) |> print
+  "Radiation amount on midsummer/midwinter day at noon:" |> print
+  for viewing in range(-90, 91, 45):
+    atMidsummer = getTimeNormalizedSunWattage(tz_datetime(timezone)(REF_YEAR,  6, 22), coordinates, Window(viewing), TimeInterval(12, 13))  # sun is around 20..0  degrees during that time
+    atMidwinter = getTimeNormalizedSunWattage(tz_datetime(timezone)(REF_YEAR, 12, 23), coordinates, Window(viewing), TimeInterval(12, 13))  # sun is around 5..-10 degrees during that time
+    "  # Windows facing at an angle of %d deg: %8f / %8f" % (viewing, atMidsummer, atMidwinter) |> print
+
+
+if __name__ == '__main__':
+  compareMidsummerMidwinter <| airportNeugrabenFischbek  # Do a sanity check
+
+  for house, windows in houseChoices.items() |> sorted:
+    house |> print
+    (getHouseScore(airportNeugrabenFischbek, windows, houseObstacles.get(house, defaultObstacle), atHomeTimes, timezone = timezone)
+      |> "  # Computed annual sum of hourly radiation during observed times: {}".format
+      |> print)

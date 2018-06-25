@@ -7,6 +7,9 @@ This software is licensed under the [MPL-2.0](https://github.com/ArneBachmann/re
 
 If you use this library for whatever purpose, please let me know so I may link back and/or refer to your projects.
 
+## Installation ##
+`pip install rese`
+
 
 ## Links ##
 - [The package documentation](./sunamount.md)
