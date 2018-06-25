@@ -3,9 +3,9 @@
 
 # Example application that may be adapted to the user's liking (anonymous real-world houses)
 
-import datetime
 
 # Dependencies (install via "pip install pytz")
+import datetime
 try:
   import pytz  # https://stackoverflow.com/questions/7373389/get-the-dst-boundaries-of-a-given-timezone-in-python
   timezone = pytz.timezone("Europe/Berlin")

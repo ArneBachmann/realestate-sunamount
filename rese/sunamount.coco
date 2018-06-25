@@ -14,8 +14,7 @@ import time      # for system locale's daylight savings information
 # Dependencies (install via "pip install pysolar pytz" - the latter only used for unit tests)
 import pysolar.solar
 
-try:
-  from typing import Any, List, Type
+try: from typing import Any, List, Type
 except: pass
 
 
@@ -36,38 +35,17 @@ ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99, weekFactor = 1.)
 
 # Utility decorator
 class memoize(dict):
-  def __init__(_, func: -> Any?) -> None: _.func = func
+  def __init__(_, func:() -> Any?) -> None: _.func = func
   def __call__(_, *args) = _[args]
   def __missing__(_, key): result = _[key] = _.func(*key); return result
 
 
-try:  # Python 3
-  Timezone:Type = datetime.timezone  # typedef
-  UTC:Timezone = datetime.timezone.utc  # the default for all test cases
-  @memoize
-  def mktz(hours:float = 0.) -> Timezone = Timezone(datetime.timedelta(hours = hours))
-  CET:Timezone =  mktz(1)
-  CEST:Timezone = mktz(2)
-except:  # Python 2 workaround
-  class TimeZone(datetime.tzinfo):
-    def __init__(_, hours:float = 0., dst_hours:float = 0, dst_start = (3, 8, 2, 0), dst_end = (11, 1, 2, 0), name:str = "<unknown timezone>") -> None:
-      datetime.tzinfo.__init__(_)  # call super constructor
-      _._offset = datetime.timedelta(hours = hours)
-      _._dstoff = datetime.timedelta(hours = dst_hours)
-      _._start = dst_start
-      _._end = dst_end
-      _._name = name
-    def utcoffset(_, dt:datetime.datetime) -> datetime.timedelta = _._offset
-    def tzname(_, dt:datetime.datetime) -> str = _._name
-    def dst(_, dt:datetime.datetime) -> datetime.timedelta? = _._dstoff ?? _._offset   # or None if unknown
-    def localize(_, dt:datetime.datetime) =
-      date_tuple = (dt.month, dt.day, dt.hour, dt.minute)
-      dt.replace(tzinfo = mktz(_._dstoff if _._start <= date_tuple <= _._end else _._offset))
-  @memoize
-  def mktz(hours:float = 0) -> Timezone = Timezone(hours)
-  UTC =  mktz(0)
-  CET =  mktz(1)
-  CEST = mktz(2)
+Timezone:Type = datetime.timezone  # typedef
+UTC:Timezone = datetime.timezone.utc  # the default for all test cases
+@memoize
+def mktz(hours:float = 0.) -> Timezone = Timezone(datetime.timedelta(hours = hours))
+CET:Timezone =  mktz(1)
+CEST:Timezone = mktz(2)
 
 
 @memoize

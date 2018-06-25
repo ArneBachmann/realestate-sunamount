@@ -1,7 +1,7 @@
 import os, sys, time
 from setuptools import setup, find_packages
 
-if sys.version_info.major > 2: raise Exception("Only works well on Python 2.7, using PyPy2-6.0 is recommended")
+if sys.version_info.major < 3: raise Exception("Only works well on Python 3.2 since pysolar library requires it")
 
 lt = time.localtime()
 version = (lt.tm_year, (10 + lt.tm_mon) * 100 + lt.tm_mday, (10 + lt.tm_hour) * 100 + lt.tm_min)
@@ -20,7 +20,7 @@ setup(
   version = versionString,  # without extra
   description = "RESE - Real estate sunlight estimator",
   long_description = "",  # TODO
-  install_requires = ["pysolar", "pytz"],
+  install_requires = ["mypy", "pysolar", "pytz"],
   classifiers = [c.strip() for c in """
         Development Status :: 5 - Production/Stable
         Intended Audience :: Developers

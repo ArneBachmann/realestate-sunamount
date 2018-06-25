@@ -1,17 +1,16 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# __coconut_hash__ = 0x74abc65
+# __coconut_hash__ = 0x65a62ff0
 
 # Compiled with Coconut version 1.3.1-post_dev28 [Dead Parrot]
 
 # Coconut Header: -------------------------------------------------------------
 
-from __future__ import print_function, absolute_import, unicode_literals, division
 import sys as _coconut_sys, os.path as _coconut_os_path
 _coconut_file_path = _coconut_os_path.dirname(_coconut_os_path.abspath(__file__))
-_coconut_cached_module = _coconut_sys.modules.get(b"__coconut__")
+_coconut_cached_module = _coconut_sys.modules.get("__coconut__")
 if _coconut_cached_module is not None and _coconut_os_path.dirname(_coconut_cached_module.__file__) != _coconut_file_path:
-    del _coconut_sys.modules[b"__coconut__"]
+    del _coconut_sys.modules["__coconut__"]
 _coconut_sys.path.insert(0, _coconut_file_path)
 from __coconut__ import _coconut, _coconut_NamedTuple, _coconut_MatchError, _coconut_tail_call, _coconut_tco, _coconut_igetitem, _coconut_base_compose, _coconut_forward_compose, _coconut_back_compose, _coconut_forward_star_compose, _coconut_back_star_compose, _coconut_pipe, _coconut_star_pipe, _coconut_back_pipe, _coconut_back_star_pipe, _coconut_bool_and, _coconut_bool_or, _coconut_none_coalesce, _coconut_minus, _coconut_map, _coconut_partial
 from __coconut__ import *
@@ -44,7 +43,7 @@ except:
 
 
 # Value type definitionss: instantiation and access per keyword or index
-class Location(_coconut_NamedTuple("Location", [("latitude", 'float'), ("longitude", 'float'), ("elevation", 'float')]), _coconut.object):  # degrees, degrees, meters
+class Location(_coconut_NamedTuple("Location", [("latitude", 'float'), ("longitude", 'float'), ("elevation", 'float')])):  # degrees, degrees, meters
     __slots__ = ()  # degrees, degrees, meters
     __ne__ = _coconut.object.__ne__  # degrees, degrees, meters
     def __eq__(self, other):  # degrees, degrees, meters
@@ -52,7 +51,7 @@ class Location(_coconut_NamedTuple("Location", [("latitude", 'float'), ("longitu
     def __new__(_cls, latitude, longitude, elevation=0.):  # degrees, degrees, meters
         return _coconut.tuple.__new__(_cls, (latitude, longitude, elevation))  # degrees, degrees, meters
 # degrees, degrees, meters
-class Room(_coconut_NamedTuple("Room", [("elevation", 'float'), ("relevance", 'float'), ("times", '_coconut.typing.Optional[_coconut.typing.Sequence[TimeInterval]]')]), _coconut.object):  # meters, factor, time intervals (if None, use default)
+class Room(_coconut_NamedTuple("Room", [("elevation", 'float'), ("relevance", 'float'), ("times", '_coconut.typing.Optional[_coconut.typing.Sequence[TimeInterval]]')])):  # meters, factor, time intervals (if None, use default)
     __slots__ = ()  # meters, factor, time intervals (if None, use default)
     __ne__ = _coconut.object.__ne__  # meters, factor, time intervals (if None, use default)
     def __eq__(self, other):  # meters, factor, time intervals (if None, use default)
@@ -60,7 +59,7 @@ class Room(_coconut_NamedTuple("Room", [("elevation", 'float'), ("relevance", 'f
     def __new__(_cls, elevation=0., relevance=1., times=None):  # meters, factor, time intervals (if None, use default)
         return _coconut.tuple.__new__(_cls, (elevation, relevance, times))  # meters, factor, time intervals (if None, use default)
 # meters, factor, time intervals (if None, use default)
-class Window(_coconut_NamedTuple("Window", [("direction", 'float'), ("room", 'Room'), ("stretch", 'float')]), _coconut.object):  # degrees, Room, factor
+class Window(_coconut_NamedTuple("Window", [("direction", 'float'), ("room", 'Room'), ("stretch", 'float')])):  # degrees, Room, factor
     __slots__ = ()  # degrees, Room, factor
     __ne__ = _coconut.object.__ne__  # degrees, Room, factor
     def __eq__(self, other):  # degrees, Room, factor
@@ -68,7 +67,7 @@ class Window(_coconut_NamedTuple("Window", [("direction", 'float'), ("room", 'Ro
     def __new__(_cls, direction, room=Room(), stretch=1.):  # degrees, Room, factor
         return _coconut.tuple.__new__(_cls, (direction, room, stretch))  # degrees, Room, factor
 # degrees, Room, factor
-class Obstacle(_coconut_NamedTuple("Obstacle", [("direction", 'float'), ("distance", 'float'), ("width", 'float'), ("height", 'float'), ("opacity", 'float')]), _coconut.object):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+class Obstacle(_coconut_NamedTuple("Obstacle", [("direction", 'float'), ("distance", 'float'), ("width", 'float'), ("height", 'float'), ("opacity", 'float')])):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
     __slots__ = ()  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
     __ne__ = _coconut.object.__ne__  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
     def __eq__(self, other):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
@@ -76,7 +75,7 @@ class Obstacle(_coconut_NamedTuple("Obstacle", [("direction", 'float'), ("distan
     def __new__(_cls, direction, distance, width, height, opacity=1.):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
         return _coconut.tuple.__new__(_cls, (direction, distance, width, height, opacity))  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
 # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
-class TimeInterval(_coconut_NamedTuple("TimeInterval", [("fromHour", 'float'), ("toHour", 'float'), ("weekFactor", 'float')]), _coconut.object):  # 0..23.99, 0..23.99, 0..1
+class TimeInterval(_coconut_NamedTuple("TimeInterval", [("fromHour", 'float'), ("toHour", 'float'), ("weekFactor", 'float')])):  # 0..23.99, 0..23.99, 0..1
     __slots__ = ()  # 0..23.99, 0..23.99, 0..1
     __ne__ = _coconut.object.__ne__  # 0..23.99, 0..23.99, 0..1
     def __eq__(self, other):  # 0..23.99, 0..23.99, 0..1
@@ -84,7 +83,7 @@ class TimeInterval(_coconut_NamedTuple("TimeInterval", [("fromHour", 'float'), (
     def __new__(_cls, fromHour, toHour, weekFactor=7. / 7.):  # 0..23.99, 0..23.99, 0..1
         return _coconut.tuple.__new__(_cls, (fromHour, toHour, weekFactor))  # 0..23.99, 0..23.99, 0..1
 # 0..23.99, 0..23.99, 0..1
-class Radiation(_coconut_NamedTuple("Radiation", [("wattage", 'float'), ("altitude", 'float'), ("azimuth", 'float')]), _coconut.object):  # watts, meters, degrees
+class Radiation(_coconut_NamedTuple("Radiation", [("wattage", 'float'), ("altitude", 'float'), ("azimuth", 'float')])):  # watts, meters, degrees
     __slots__ = ()  # watts, meters, degrees
     __ne__ = _coconut.object.__ne__  # watts, meters, degrees
     def __eq__(self, other):  # watts, meters, degrees
@@ -100,9 +99,7 @@ ENTIRE_DAY = TimeInterval(fromHour=0., toHour=23.99, weekFactor=1.)
 
 # Utility decorator
 class memoize(dict):
-    def __init__(_, func  # type: _coconut.typing.Callable[..., _coconut.typing.Optional[Any]]
-    ):
-# type: (...) -> None
+    def __init__(_, func: '_coconut.typing.Callable[[], _coconut.typing.Optional[Any]]') -> 'None':
         _.func = func
     def __call__(_, *args):
         return _[args]
@@ -111,88 +108,32 @@ class memoize(dict):
         return result
 
 
-try:  # Python 3
-    Timezone = datetime.timezone  # type: Type  # typedef
-    UTC = datetime.timezone.utc  # type: Timezone  # the default for all test cases
-    @memoize
-    @_coconut_tco
-    def mktz(hours=0.  # type: float
-    ):
-# type: (...) -> Timezone
-        return _coconut_tail_call(Timezone, datetime.timedelta(hours=hours))
-    CET = mktz(1)  # type: Timezone
-    CEST = mktz(2)  # type: Timezone
-except:  # Python 2 workaround
-    class TimeZone(datetime.tzinfo):
-        def __init__(_, hours=0.,  # type: float
-     dst_hours=0,  # type: float
-     dst_start=(3, 8, 2, 0), dst_end=(11, 1, 2, 0), name="<unknown timezone>"  # type: str
-    ):
-# type: (...) -> None
-            datetime.tzinfo.__init__(_)  # call super constructor
-            _._offset = datetime.timedelta(hours=hours)
-            _._dstoff = datetime.timedelta(hours=dst_hours)
-            _._start = dst_start
-            _._end = dst_end
-            _._name = name
-        def utcoffset(_, dt  # type: datetime.datetime
-    ):
-# type: (...) -> datetime.timedelta
-            return _._offset
-        def tzname(_, dt  # type: datetime.datetime
-    ):
-# type: (...) -> str
-            return _._name
-        @_coconut_tco  # or None if unknown
-        def dst(_, dt  # type: datetime.datetime
-    ):  # or None if unknown
-# type: (...) -> _coconut.typing.Optional[datetime.timedelta]  # or None if unknown
-            return _coconut_tail_call((lambda _coconut_none_coalesce_item: _._offset if _coconut_none_coalesce_item is None else _coconut_none_coalesce_item), _._dstoff)  # or None if unknown
-        @_coconut_tco
-        def localize(_, dt  # type: datetime.datetime
-    ):
-            date_tuple = (dt.month, dt.day, dt.hour, dt.minute)
-            return _coconut_tail_call(dt.replace, tzinfo=mktz(_._dstoff if _._start <= date_tuple <= _._end else _._offset))
-    @memoize
-    @_coconut_tco
-    def mktz(hours=0  # type: float
-    ):
-# type: (...) -> Timezone
-        return _coconut_tail_call(Timezone, hours)
-    UTC = mktz(0)
-    CET = mktz(1)
-    CEST = mktz(2)
+Timezone = datetime.timezone  # type: Type  # typedef
+UTC = datetime.timezone.utc  # type: Timezone  # the default for all test cases
+@memoize
+@_coconut_tco
+def mktz(hours: 'float'=0.) -> 'Timezone':
+    return _coconut_tail_call(Timezone, datetime.timedelta(hours=hours))
+CET = mktz(1)  # type: Timezone
+CEST = mktz(2)  # type: Timezone
 
 
 @memoize
 @_coconut_tco
-def daysinyear(year  # type: int
-    ):
-# type: (...) -> int
+def daysinyear(year: 'int') -> 'int':
     return _coconut_tail_call(sum, [calendar.monthrange(year, month)[1] for month in range(1, 12 + 1)])
 
-def sq(value  # type: float
-    ):  # or value ** 2
-# type: (...) -> float  # or value ** 2
+def sq(value: 'float') -> 'float':  # or value ** 2
     return value * value  # or value ** 2
 
-def is_dst(dt  # type: datetime.datetime
-    ):  # WARN: uses only the system's local timezone. HINT: In Python, bool is an int, but mypy complains
-# type: (...) -> int  # WARN: uses only the system's local timezone. HINT: In Python, bool is an int, but mypy complains
+def is_dst(dt: 'datetime.datetime') -> 'int':  # WARN: uses only the system's local timezone. HINT: In Python, bool is an int, but mypy complains
     return time.localtime(calendar.timegm(dt.timetuple())).tm_isdst  # WARN: uses only the system's local timezone. HINT: In Python, bool is an int, but mypy complains
 
-def tz_datetime(tz  # type: Timezone
-    ):
-# type: (...) -> function
+def tz_datetime(tz: 'Timezone') -> 'function':
     return lambda *args, **kwargs: datetime.datetime(*args, **kwargs).replace(tzinfo=tz)
 
 
-def getShadowing(sunAltitude,  # type: float
-     direction,  # type: float
-     obstacle,  # type: Obstacle
-     elevation=0.  # type: float
-    ):
-# type: (...) -> float
+def getShadowing(sunAltitude: 'float', direction: 'float', obstacle: 'Obstacle', elevation: 'float'=0.) -> 'float':
     ''' Returns sunlight ratio of another building shadowing a window
       returns: 0..1 factor to multiply with incoming sunlight wattage, to reduce its value by the obstacle blocking some light (lower value means less light/more shadowing)
 
@@ -228,11 +169,7 @@ def getShadowing(sunAltitude,  # type: float
     return translucency + obstacle.opacity * (horizontal_diff_deg / horizontalAngle) * (sunAltitude / verticalAngle)  # product of quotients -> factor 0..1 favouring low values. translucency/opacity divide the interval 0..1. for factor 1 and the computed factor
 
 
-def getAngleCorrectionRoomFactor(viewingAngle,  # type: float
-     incomingAngle,  # type: float
-     stretch_factor=1.  # type: float
-    ):
-# type: (...) -> float
+def getAngleCorrectionRoomFactor(viewingAngle: 'float', incomingAngle: 'float', stretch_factor: 'float'=1.) -> 'float':
     ''' Return light factor determined by angle difference.
       returns: 0..1 factor that corrects the sunlight wattage
 
@@ -273,11 +210,7 @@ def getAngleCorrectionRoomFactor(viewingAngle,  # type: float
 
 
 @_coconut_tco
-def getAngleCorrectedSunWattage(date,  # type: datetime.datetime
-     location,  # type: Location
-     window  # type: Window
-    ):
-# type: (...) -> Radiation
+def getAngleCorrectedSunWattage(date: 'datetime.datetime', location: 'Location', window: 'Window') -> 'Radiation':
     ''' Get radiation amount for specific date, location, and viewing direction.
       returns: a Radiation value type
 
@@ -306,14 +239,7 @@ def getAngleCorrectedSunWattage(date,  # type: datetime.datetime
     return Radiation(factor * pysolar.solar.radiation.get_radiation_direct(date, altitude), altitude, azimuth) if factor > 0. else Radiation(0., 0., 0.)  # compute radiation in Watts / square meter
 
 
-def getTimeNormalizedSunWattage(date,  # type: datetime.datetime
-     location,  # type: Location
-     window,  # type: Window
-     timeInterval=ENTIRE_DAY,  # type: TimeInterval
-     obstacles=[],  # type: _coconut.typing.Sequence[Obstacle]
-     minute_interval=MINUTE_STEPS  # type: int
-    ):
-# type: (...) -> float
+def getTimeNormalizedSunWattage(date: 'datetime.datetime', location: 'Location', window: 'Window', timeInterval: 'TimeInterval'=ENTIRE_DAY, obstacles: '_coconut.typing.Sequence[Obstacle]'=[], minute_interval: 'int'=MINUTE_STEPS) -> 'float':
     ''' Computes radiation by the minute, then normalize by time interval for an hourly value.
       returns: hourly average radiation (for observed time interval)
 
@@ -347,15 +273,7 @@ def getTimeNormalizedSunWattage(date,  # type: datetime.datetime
     return amount / norm if norm != 0. else 0.
 
 
-def getDailySunWattageSumForEntireYear(location,  # type: Location
-     window,  # type: Window
-     timeInterval,  # type: TimeInterval
-     obstacles=[],  # type: _coconut.typing.Sequence[Obstacle]
-     year=REF_YEAR,  # type: int
-     timezone=UTC,  # type: Timezone
-     time_dst=None  # type: _coconut.typing.Optional[Timezone]
-    ):
-# type: (...) -> float
+def getDailySunWattageSumForEntireYear(location: 'Location', window: 'Window', timeInterval: 'TimeInterval', obstacles: '_coconut.typing.Sequence[Obstacle]'=[], year: 'int'=REF_YEAR, timezone: 'Timezone'=UTC, time_dst: '_coconut.typing.Optional[Timezone]'=None) -> 'float':
     ''' Return sum of daily average radiation amount.
       returns: computed aggregate wattage
 
@@ -392,14 +310,7 @@ def getDailySunWattageSumForEntireYear(location,  # type: Location
     return amount
 
 
-def getHouseScore(location,  # type: Location
-     windows,  # type: _coconut.typing.Sequence[Window]
-     obstacles,  # type: _coconut.typing.Sequence[Obstacle]
-     timeIntervals=[],  # type: _coconut.typing.Sequence[TimeInterval]
-     timezone=UTC,  # type: Timezone
-     time_dst=None  # type: _coconut.typing.Optional[Timezone]
-    ):
-# type: (...) -> float
+def getHouseScore(location: 'Location', windows: '_coconut.typing.Sequence[Window]', obstacles: '_coconut.typing.Sequence[Obstacle]', timeIntervals: '_coconut.typing.Sequence[TimeInterval]'=[], timezone: 'Timezone'=UTC, time_dst: '_coconut.typing.Optional[Timezone]'=None) -> 'float':
     ''' Second experiment. Simply show sum of annual amount of daily-hour-normalized sun wattage to compare different house options.
       returns: a score >= 0
 

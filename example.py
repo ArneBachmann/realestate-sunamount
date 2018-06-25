@@ -1,17 +1,16 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# __coconut_hash__ = 0x7c0d00a1
+# __coconut_hash__ = 0xcbcbbb44
 
 # Compiled with Coconut version 1.3.1-post_dev28 [Dead Parrot]
 
 # Coconut Header: -------------------------------------------------------------
 
-from __future__ import print_function, absolute_import, unicode_literals, division
 import sys as _coconut_sys, os.path as _coconut_os_path
 _coconut_file_path = _coconut_os_path.dirname(_coconut_os_path.abspath(__file__))
-_coconut_cached_module = _coconut_sys.modules.get(b"__coconut__")
+_coconut_cached_module = _coconut_sys.modules.get("__coconut__")
 if _coconut_cached_module is not None and _coconut_os_path.dirname(_coconut_cached_module.__file__) != _coconut_file_path:
-    del _coconut_sys.modules[b"__coconut__"]
+    del _coconut_sys.modules["__coconut__"]
 _coconut_sys.path.insert(0, _coconut_file_path)
 from __coconut__ import _coconut, _coconut_NamedTuple, _coconut_MatchError, _coconut_tail_call, _coconut_tco, _coconut_igetitem, _coconut_base_compose, _coconut_forward_compose, _coconut_back_compose, _coconut_forward_star_compose, _coconut_back_star_compose, _coconut_pipe, _coconut_star_pipe, _coconut_back_pipe, _coconut_back_star_pipe, _coconut_bool_and, _coconut_bool_or, _coconut_none_coalesce, _coconut_minus, _coconut_map, _coconut_partial
 from __coconut__ import *
@@ -26,6 +25,7 @@ _coconut_sys.path.remove(_coconut_file_path)
 
 
 # Dependencies (install via "pip install pytz")
+import datetime
 try:
     import pytz  # https://stackoverflow.com/questions/7373389/get-the-dst-boundaries-of-a-given-timezone-in-python
     timezone = pytz.timezone("Europe/Berlin")
@@ -34,7 +34,7 @@ except:
     timezone = Timezone(LOCAL_TIME_OFFSET)
 
 # Custom module
-from sunamount import *
+from rese.sunamount import *
 
 
 # Constants
@@ -50,9 +50,7 @@ houseObstacles = {"Option 1": [Obstacle(20, 50, 10, 10, .9), Obstacle(30, -5, 5,
 
 
 # Functions
-def compareMidsummerMidwinter(coordinates  # type: Location
-    ):
-# type: (...) -> None
+def compareMidsummerMidwinter(coordinates: 'Location') -> 'None':
     ''' One experiment to confirm assumptions about sun light during day/year. '''
     (print)("Radiation amount on midsummer/midwinter day for specified time windows:")
     for viewing in range(-90, 91, 45):  # from west over south to east
