@@ -3,6 +3,7 @@
 
 # Example application that may be adapted to the user's liking (anonymous real-world houses)
 
+import datetime
 
 # Dependencies (install via "pip install pytz")
 try:
@@ -13,7 +14,7 @@ except:
   timezone = Timezone(LOCAL_TIME_OFFSET)
 
 # Custom module
-from sunamount import *
+from rese.sunamount import *
 
 
 # Constants
