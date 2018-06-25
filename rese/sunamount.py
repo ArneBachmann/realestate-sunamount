@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-# __coconut_hash__ = 0x8bfac926
+# __coconut_hash__ = 0x74abc65
 
 # Compiled with Coconut version 1.3.1-post_dev28 [Dead Parrot]
 
@@ -9,9 +9,9 @@
 from __future__ import print_function, absolute_import, unicode_literals, division
 import sys as _coconut_sys, os.path as _coconut_os_path
 _coconut_file_path = _coconut_os_path.dirname(_coconut_os_path.abspath(__file__))
-_coconut_cached_module = _coconut_sys.modules.get(str("__coconut__"))
+_coconut_cached_module = _coconut_sys.modules.get(b"__coconut__")
 if _coconut_cached_module is not None and _coconut_os_path.dirname(_coconut_cached_module.__file__) != _coconut_file_path:
-    del _coconut_sys.modules[str("__coconut__")]
+    del _coconut_sys.modules[b"__coconut__"]
 _coconut_sys.path.insert(0, _coconut_file_path)
 from __coconut__ import _coconut, _coconut_NamedTuple, _coconut_MatchError, _coconut_tail_call, _coconut_tco, _coconut_igetitem, _coconut_base_compose, _coconut_forward_compose, _coconut_back_compose, _coconut_forward_star_compose, _coconut_back_star_compose, _coconut_pipe, _coconut_star_pipe, _coconut_back_pipe, _coconut_back_star_pipe, _coconut_bool_and, _coconut_bool_or, _coconut_none_coalesce, _coconut_minus, _coconut_map, _coconut_partial
 from __coconut__ import *
@@ -68,14 +68,14 @@ class Window(_coconut_NamedTuple("Window", [("direction", 'float'), ("room", 'Ro
     def __new__(_cls, direction, room=Room(), stretch=1.):  # degrees, Room, factor
         return _coconut.tuple.__new__(_cls, (direction, room, stretch))  # degrees, Room, factor
 # degrees, Room, factor
-class Obstacle(_coconut_NamedTuple("Obstacle", [("direction", 'float'), ("distance", 'float'), ("width", 'float'), ("height", 'float'), ("opacity", 'float')]), _coconut.object):  # degrees, meters, meters, meters, 0..1
-    __slots__ = ()  # degrees, meters, meters, meters, 0..1
-    __ne__ = _coconut.object.__ne__  # degrees, meters, meters, meters, 0..1
-    def __eq__(self, other):  # degrees, meters, meters, meters, 0..1
-        return self.__class__ is other.__class__ and _coconut.tuple.__eq__(self, other)  # degrees, meters, meters, meters, 0..1
-    def __new__(_cls, direction, distance, width, height, opacity=1.):  # degrees, meters, meters, meters, 0..1
-        return _coconut.tuple.__new__(_cls, (direction, distance, width, height, opacity))  # degrees, meters, meters, meters, 0..1
-# degrees, meters, meters, meters, 0..1
+class Obstacle(_coconut_NamedTuple("Obstacle", [("direction", 'float'), ("distance", 'float'), ("width", 'float'), ("height", 'float'), ("opacity", 'float')]), _coconut.object):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+    __slots__ = ()  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+    __ne__ = _coconut.object.__ne__  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+    def __eq__(self, other):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+        return self.__class__ is other.__class__ and _coconut.tuple.__eq__(self, other)  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+    def __new__(_cls, direction, distance, width, height, opacity=1.):  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+        return _coconut.tuple.__new__(_cls, (direction, distance, width, height, opacity))  # degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
+# degrees, meters, meters, meters, 0..1 (0=fully translucent, 1=fully opaque)
 class TimeInterval(_coconut_NamedTuple("TimeInterval", [("fromHour", 'float'), ("toHour", 'float'), ("weekFactor", 'float')]), _coconut.object):  # 0..23.99, 0..23.99, 0..1
     __slots__ = ()  # 0..23.99, 0..23.99, 0..1
     __ne__ = _coconut.object.__ne__  # 0..23.99, 0..23.99, 0..1
@@ -95,7 +95,7 @@ class Radiation(_coconut_NamedTuple("Radiation", [("wattage", 'float'), ("altitu
 # Constants
 REF_YEAR = 2015  # type: int  # last year with leap seconds definition of the pysolar module, to avoid a warning
 MINUTE_STEPS = 5  # type: int  # time interval for accumulated daily sun wattage (increase for faster computation, decrease for more accurate results)
-ENTIRE_DAY = TimeInterval(fromHour=0., toHour=23.99)
+ENTIRE_DAY = TimeInterval(fromHour=0., toHour=23.99, weekFactor=1.)
 
 
 # Utility decorator
@@ -125,7 +125,7 @@ try:  # Python 3
 except:  # Python 2 workaround
     class TimeZone(datetime.tzinfo):
         def __init__(_, hours=0.,  # type: float
-     dst_hours=None,  # type: _coconut.typing.Optional[float]
+     dst_hours=0,  # type: float
      dst_start=(3, 8, 2, 0), dst_end=(11, 1, 2, 0), name="<unknown timezone>"  # type: str
     ):
 # type: (...) -> None

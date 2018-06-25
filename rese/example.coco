@@ -39,7 +39,7 @@ houseObstacles = {
 
 
 # Functions
-def compareMidsummerMidwinter(coordinates:Location[]) -> None:
+def compareMidsummerMidwinter(coordinates:Location) -> None:
   ''' One experiment to confirm assumptions about sun light during day/year. '''
   "Radiation amount on midsummer/midwinter day for specified time windows:" |> print
   for viewing in range(-90, 91, 45):  # from west over south to east
@@ -58,6 +58,6 @@ if __name__ == '__main__':
 
   for house, windows in houseChoices.items() |> sorted:
     house |> print
-    (getHouseScore(airportNeugrabenFischbek, windows, houseObstacles.get(house, defaultObstacle), atHomeTimes, timezone = timezone)
+    (getHouseScore(airportNeugrabenFischbek, windows, houseObstacles.get(house, [defaultObstacle]), atHomeTimes, timezone = timezone)
       |> "  # Computed annual sum of hourly radiation during observed times: {}".format
       |> print)
