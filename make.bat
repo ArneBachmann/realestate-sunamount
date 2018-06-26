@@ -1,6 +1,6 @@
 @echo off
 echo Compiling
-python3 -V
+python3 -V >nul 2>&1
 if errorlevel 1 (
   set PY=python
 ) else (
