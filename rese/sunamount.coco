@@ -11,10 +11,10 @@ import datetime  # for timestamp generation
 import math      # trigonometry
 import time      # for system locale's daylight savings information
 
-# Dependencies (install via "pip install pysolar pytz" - the latter only used for unit tests)
+# Dependencies (install via "pip install pysolar pytz" - the latter is only used for unit tests)
 import pysolar.solar
 
-try: from typing import Any, List, Type
+try: from typing import Any, Type
 except: pass
 
 
@@ -28,7 +28,7 @@ data Radiation(wattage:float, altitude:float, azimuth:float)  # watts, meters, d
 
 
 # Constants
-REF_YEAR:int = 2015  # last year with leap seconds definition of the pysolar module, to avoid a warning
+REF_YEAR:int = 2015   # last year with leap seconds definition of the pysolar module, to avoid a warning
 MINUTE_STEPS:int = 5  # time interval for accumulated daily sun wattage (increase for faster computation, decrease for more accurate results)
 ENTIRE_DAY = TimeInterval(fromHour = 0., toHour = 23.99, weekFactor = 1.)
 
@@ -138,22 +138,23 @@ def getAngleCorrectedSunWattage(date:datetime.datetime, location:Location, windo
 
   >>> location = Location(53.4613331, 9.8276266, 20.)
   >>> def output(irr): print((round(irr.wattage, 3), round(irr.altitude, 3), round(irr.azimuth, 3)))
-  >>> output(getAngleCorrectedSunWattage(tz_datetime(CET)(REF_YEAR, 1, 1,  0), location, Window(0.)))  # facing south
+  >>> output(getAngleCorrectedSunWattage(tz_datetime(CET)(REF_YEAR, 1, 1,  0),  location, Window(0.)))  # facing south
   (0.0, 0.0, 0.0)
   >>> output(getAngleCorrectedSunWattage(tz_datetime(CEST)(REF_YEAR, 6, 1,  0), location, Window(0.)))  # midnight
   (0.0, 0.0, 0.0)
-  >>> output(getAngleCorrectedSunWattage(tz_datetime(CET)(REF_YEAR, 1, 1, 12), location, Window(0.)))  # noon january
+  >>> output(getAngleCorrectedSunWattage(tz_datetime(CET)(REF_YEAR, 1, 1, 12),  location, Window(0.)))  # noon january
   (674.304, 13.421, 5.699)
   >>> output(getAngleCorrectedSunWattage(tz_datetime(CEST)(REF_YEAR, 6, 1, 12), location, Window(0.)))  # noon june
   (718.889, 55.223, 33.055)
-  >>> output(getAngleCorrectedSunWattage(tz_datetime(CEST)(REF_YEAR, 6, 1, 9), location, Window(-90.)))  # noon june other angle
+  >>> output(getAngleCorrectedSunWattage(tz_datetime(CEST)(REF_YEAR, 6, 1, 9),  location, Window(-90.)))  # noon june other angle
   (0.0, 0.0, 0.0)
   '''
+  breakpoint()
   altitude:float = pysolar.solar.get_altitude(location.latitude, location.longitude, date, location.elevation + window.room.elevation)  # in degrees and meters
-  azimuth:float = pysolar.solar.get_azimuth(location.latitude, location.longitude, date, location.elevation + window.room.elevation)
-  if azimuth < -180.:  azimuth += 360.  # normalization
-  elif azimuth > 180.: azimuth -= 360.  # to -180..180
-  if altitude < 0. or altitude >  180.: return Radiation(0., 0., 0.)  # behind the horizon, don't return radiation
+  azimuth:float  = pysolar.solar.get_azimuth( location.latitude, location.longitude, date, location.elevation + window.room.elevation)
+  if azimuth   < -180.: azimuth += 360.  # normalization
+  elif azimuth >  180.: azimuth -= 360.  # to -180..180
+  if altitude  <    0. or altitude >  180.: return Radiation(0., 0., 0.)  # behind the horizon, don't return radiation
   factor = getAngleCorrectionRoomFactor(window.direction, azimuth, window.stretch)
   return Radiation(factor * pysolar.solar.radiation.get_radiation_direct(date, altitude), altitude, azimuth) if factor > 0. else Radiation(0., 0., 0.)  # compute radiation in Watts / square meter
 
